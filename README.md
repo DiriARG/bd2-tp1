@@ -16,4 +16,10 @@
 
 ## Instrucciones de Ejecución 🚀:
 
+Para recrear la base de datos completa, los archivos deben ejecutarse en el siguiente orden en un entorno **PostgreSQL**:
+
+1. `schema.sql`: Crea la estructura de tablas, restricciones de integridad (PK, FK, UNIQUE, NOT NULL y CHECK) y relaciones.
+2. `seed.sql`: Genera los datos de prueba (50 productos, 100 clientes y 200 pedidos con sus detalles).
+3. `queries.sql`: Contiene las 13 consultas analíticas solicitadas.
+
 ## Decisiones de Diseño y Normalización 🏗️:
