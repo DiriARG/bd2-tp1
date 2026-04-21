@@ -8,7 +8,8 @@ CREATE TABLE categorias (
 CREATE TABLE clientes (
     cliente_id SERIAL PRIMARY KEY,
     nombre TEXT NOT NULL,
-	email TEXT UNIQUE NOT NULL, -- "UNIQUE" para evitar cuentas de clientes duplicadas. 
+	-- "UNIQUE" para evitar cuentas de clientes duplicadas. 
+    email TEXT UNIQUE NOT NULL CHECK (position('@' in email) > 1), -- Se checkea que que exista un "@" y que no esté en la primera posición.
     ciudad TEXT NOT NULL
 );
 
