@@ -17,7 +17,7 @@
 
 ## Instrucciones de ejecución 🚀:
 
-Para recrear la base de datos completa, los archivos deben ejecutarse en el siguiente orden en un entorno **PostgreSQL**:
+Para recrear la base de datos completa, los archivos deben ejecutarse en el **siguiente orden** en un entorno **PostgreSQL**:
 
 1. **schema.sql**: Crea la estructura de tablas, restricciones de integridad (PK, FK, UNIQUE, NOT NULL y CHECK) y relaciones.
 2. **seed.sql**: Genera los datos de prueba (50 productos, 100 clientes y 200 pedidos con sus detalles).
@@ -27,11 +27,11 @@ Para recrear la base de datos completa, los archivos deben ejecutarse en el sigu
 
 ### Normalización
 
-El modelo fue diseñado siguiendo los principios de la **Tercera Forma Normal (3NF)** para garantizar la integridad de los datos y eliminar redundancias:
+El modelo fue diseñado siguiendo los principios de la **tercera forma normal (3NF)** para garantizar la integridad de los datos y eliminar redundancias:
 
 - **1FN (Atomicidad)**: Todos los atributos contienen valores atómicos (nombres, correos, precios y fechas), sin listas, ni grupos repetitivos.
-- **2FN (Dependencia Funcional)**: Se eliminaron las dependencias parciales mediante el uso de claves primarias simples (`producto_id`, `categoria_id`y `cliente_id`) y una clave primaria compuesta en **detalle_pedido** (`pedido_id`, `producto_id`), garantizando que todos los atributos no clave dependan de la clave primaria compuesta y no únicamente de una parte de ella.
-- **3FN (Dependencia Transitiva)**: Se separaron las categorías en una tabla independiente, evitando que los atributos descriptivos de la categoría (como `nombre`) dependan transitivamente del ID del producto (`producto_id`). De esta forma, los atributos no clave dependen directamente de la clave primaria y no de otro atributo no clave.
+- **2FN (Dependencia funcional)**: Se eliminaron las dependencias parciales mediante el uso de claves primarias simples (`producto_id`, `categoria_id`y `cliente_id`) y una clave primaria compuesta en **detalle_pedido** (`pedido_id`, `producto_id`), garantizando que todos los atributos no clave dependan de la clave primaria compuesta y no únicamente de una parte de ella.
+- **3FN (Dependencia transitiva)**: Se separaron las categorías en una tabla independiente, evitando que los atributos descriptivos de la categoría (como `nombre`) dependan transitivamente del ID del producto (`producto_id`). De esta forma, los atributos no clave dependen directamente de la clave primaria y no de otro atributo no clave.
 
 ### Integridad referencial y reglas de negocio
 
@@ -41,6 +41,12 @@ Se implementaron acciones de `FOREIGN KEY` que reflejan el comportamiento de un 
 - **ON DELETE CASCADE** (en `detalle_pedido`): Si un pedido se elimina, automáticamente se eliminan todos sus registros asociados para evitar "datos huérfanos" en el sistema.
 - **ON DELETE SET NULL** (en `productos`): Si una categoría es dada de baja, los registros en la tabla de productos se mantienen activos pero su referencia se establece como nula ("sin clasificar"), preservando el registro del stock físico.
 - **Restricciones de Dominio** (`CHECK`): Se validó a nivel de motor que el precio sea > 0 y el stock sea ≥ 0 para prevenir estados de inventario lógicamente imposibles.
+
+#### Notas técnicas adicionales sobre schema.sql:
+
+- **Flexibilidad y tipos de datos string**: Se optó por el tipo `TEXT` para todas las cadenas de caracteres (`nombre`, `email`, `ciudad`), siguiendo la premisa **"Default → TEXT"**. Al no existir en la consigna reglas de negocio explícitas que limiten la longitud de los campos, se evitaron restricciones arbitrarias como `VARCHAR(255)`, aprovechando que en PostgreSQL no hay penalizaciones de rendimiento y garantizando un modelo que no fallará ante datos de longitud imprevista.
+- **Integridad de datos monetarios**: Se utiliza `NUMERIC(10,2)` en todas las columnas de montos. A diferencia de los tipos de punto flotante (como `FLOAT` o `REAL`), este tipo de dato evita errores de redondeo decimal, algo indispensable para la exactitud en cálculos de facturación y reportes.
+- **Precio histórico e integridad contable**: Se almacena el `precio_unitario` directamente en la tabla **detalle_pedido**. Aunque el precio ya existe en la tabla productos, esta **desnormalización deliberada** garantiza que si un producto cambia de precio mañana, los totales de las ventas realizadas hoy no se alteren retroactivamente, preservando la validez de los comprobantes.
 
 ## Generación de datos 📊:
 
